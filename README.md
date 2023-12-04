@@ -15,7 +15,7 @@ python -m venv venv
 - pip install -r requirements.txt OR pip install fastapi uvicorn
 
 # to start the app in local host : 8000
-- `uvicorn main:app --reload`
+- `uvicorn main:app --reload` OR `python -m uvicorn main:app --reload`
 
 # to access all the END POINTS 
 - http://127.0.0.1:8000/docs
