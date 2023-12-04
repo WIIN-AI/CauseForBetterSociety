@@ -44,10 +44,7 @@ except FileNotFoundError:
 
 
 @app.post("/add_image/")
-async def add_image(
-        file: UploadFile = File(...),
-        description: str = Form(...),
-):
+async def add_image(file: UploadFile = File(...), description: str = Form(...), ):
     # Save the image to the file manager
     with open(f"{image_storage_path}/{file.filename}", "wb") as image:
         image.write(file.file.read())
@@ -107,4 +104,5 @@ async def get_comments(filename: str):
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
