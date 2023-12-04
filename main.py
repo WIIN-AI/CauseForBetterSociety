@@ -103,3 +103,8 @@ async def get_comments(filename: str):
         return JSONResponse(content={"comments": comments[filename]["comments"]})
     else:
         return JSONResponse(content={"message": "Image not found"}, status_code=404)
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8080)
