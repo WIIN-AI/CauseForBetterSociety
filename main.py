@@ -12,7 +12,14 @@ from typing import List
 
 from rootdir import ROOT_DIR
 
-app = FastAPI()
+app = FastAPI(debug=True)
+
+origins =[
+    "http://localhost",
+    "http://localhost:8080",
+    "http://0.0.0.0:8080",
+]
+
 # Enable CORS for all origins
 app.add_middleware(
     CORSMiddleware,
