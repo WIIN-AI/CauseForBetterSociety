@@ -14,7 +14,7 @@ from rootdir import ROOT_DIR
 
 app = FastAPI(debug=True)
 
-origins =[
+origins = [
     "http://localhost",
     "http://localhost:8080",
     "http://0.0.0.0:8080",
@@ -106,6 +106,16 @@ async def get_comments(filename: str):
     if filename in comments:
         return JSONResponse(content={"comments": comments[filename]["comments"]})
     else:
+        return JSONResponse(content={"message": "Image not found"}, status_code=404)
+
+
+@app.post("/genai/chat")
+async def genai_chat(user_query: str):
+    try:
+        print("user input query ", user_query)
+        return JSONResponse(content={"message": "sample GEN AI response"},status_code=200)
+    except Exception as ex:
+        print(ex)
         return JSONResponse(content={"message": "Image not found"}, status_code=404)
 
 
