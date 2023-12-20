@@ -80,7 +80,7 @@ async def add_image(file: UploadFile = File(...),
     return JSONResponse(content={"message": "Image added successfully"})
 
 
-@app.post("/add_comment/{filename}")
+@app.post("/add_comment")
 async def add_comment(image_id: str, comment: str):
     # Add a comment to the image in the comments file
     with open(comments_file, "r") as f:
@@ -97,7 +97,7 @@ async def add_comment(image_id: str, comment: str):
         return JSONResponse(content={"message": "Image not found"}, status_code=404)
 
 
-@app.get("/get_images/")
+@app.get("/get_images")
 async def get_images():
     # Retrieve all images and their information
     with open(comments_file, "r") as f:
