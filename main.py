@@ -193,6 +193,17 @@ async def genai_delete_all_document():
         return JSONResponse(content={"message": "delete_all_document Failed"}, status_code=404)
 
 
+@app.post("/genai/get_all_documents")
+async def gen_ai_get_all_documents():
+    try:
+        list_docs = ["SAMPLE_DOC_01", "SAMPLE_DOC_02"]
+        return JSONResponse(content={"message": list_docs}, status_code=200)
+    except Exception as ex:
+        print(ex)
+        return JSONResponse(content={"message": [] }, status_code=404)
+
+
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
