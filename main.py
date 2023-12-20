@@ -9,6 +9,7 @@ from starlette.requests import Request
 import boto3
 import os
 from typing import List
+import uuid
 
 from rootdir import ROOT_DIR
 
@@ -51,17 +52,27 @@ except FileNotFoundError:
 
 
 @app.post("/add_image/")
-async def add_image(file: UploadFile = File(...), description: str = Form(...), ):
-    # Save the image to the file manager
+async def add_image(file: UploadFile = File(...),
+                    heading: str = None, description: str = None,
+                    user_visibility: bool = True, location: str = None):
     with open(f"{image_storage_path}/{file.filename}", "wb") as image:
         image.write(file.file.read())
-
+    uuid_ = str(uuid.uuid4())
     # Add image information to the comments file
-    image_info = {"filename": file.filename, "description": description, "comments": []}
+    image_info = {"filename": file.filename,
+                  "uuid": uuid_,
+                  "heading": heading,
+                  "description": description,
+                  "comments": [],
+                  "user_visibility": user_visibility,
+                  "location": location,
+                  "like": None
+                  }
+    print(image_info)
     with open(comments_file, "r") as f:
         comments = json.load(f)
 
-    comments[file.filename] = image_info
+    comments[uuid_] = image_info
 
     with open(comments_file, "w") as f:
         json.dump(comments, f)
@@ -70,16 +81,16 @@ async def add_image(file: UploadFile = File(...), description: str = Form(...), 
 
 
 @app.post("/add_comment/{filename}")
-async def add_comment(filename: str, comment: str):
+async def add_comment(image_id: str, comment: str):
     # Add a comment to the image in the comments file
     with open(comments_file, "r") as f:
-        comments = json.load(f)
+        _data = json.load(f)
 
-    if filename in comments:
-        comments[filename]["comments"].append(comment)
+    if image_id in _data:
+        _data[image_id]["comments"].append(comment)
 
         with open(comments_file, "w") as f:
-            json.dump(comments, f)
+            json.dump(_data, f)
 
         return JSONResponse(content={"message": "Comment added successfully"})
     else:
@@ -92,34 +103,96 @@ async def get_images():
     with open(comments_file, "r") as f:
         comments = json.load(f)
 
-    image_list = [{"filename": info["filename"], "description": info["description"]} for info in comments.values()]
+    image_list = [{
+        "image_id": info["uuid"],
+        "filename": info["filename"],
+        "description": info["description"]
+    } for info in comments.values()]
 
     return JSONResponse(content=image_list)
 
 
-@app.get("/get_comments/{filename}")
-async def get_comments(filename: str):
+@app.get("/get_comments")
+async def get_comments(image_id: str):
     # Retrieve comments for a specific image
+    with open(comments_file, "r") as f:
+        _data = json.load(f)
+
+    if image_id in _data:
+        return JSONResponse(content={"comments": _data[image_id]["comments"]})
+    else:
+        return JSONResponse(content={"message": "Image not found"}, status_code=404)
+
+
+@app.get("/get_single_incident_details")
+async def single_incident_details(image_id: str):
+    # Retrieve comments for a specific image
+    with open(comments_file, "r") as f:
+        _data = json.load(f)
+
+    if image_id in _data:
+        return JSONResponse(content={"comments": _data[image_id]}, status_code=200)
+    else:
+        return JSONResponse(content={"message": f"Image {image_id} not found"}, status_code=404)
+
+
+@app.get("/get_all_incident_details")
+async def single_incident_details():
+    try:
+        # Retrieve comments for a specific image
+        with open(comments_file, "r") as f:
+            _data = json.load(f)
+        return JSONResponse(content={"comments": _data}, status_code=200)
+    except Exception as ex:
+        return JSONResponse(content={"message": ex}, status_code=404)
+
+
+@app.get("/like_status")
+async def like_status_update(image_id: str, is_liked: bool):
     with open(comments_file, "r") as f:
         comments = json.load(f)
 
-    if filename in comments:
-        return JSONResponse(content={"comments": comments[filename]["comments"]})
+    if is_liked:
+        comments[image_id]["like"] = comments[image_id]["like"] - 1
     else:
-        return JSONResponse(content={"message": "Image not found"}, status_code=404)
+        comments[image_id]["like"] = comments[image_id]["like"] + 1
+
+    if image_id in comments:
+        return JSONResponse(content={"comments": comments[image_id]}, status_code=200)
+    else:
+        return JSONResponse(content={"message": f"Image {image_id} not found"}, status_code=404)
 
 
 @app.post("/genai/chat")
 async def genai_chat(user_query: str):
     try:
         print("user input query ", user_query)
-        return JSONResponse(content={"message": "sample GEN AI response"},status_code=200)
+        return JSONResponse(content={"answer": "sample GEN AI response"}, status_code=200)
     except Exception as ex:
         print(ex)
         return JSONResponse(content={"message": "Image not found"}, status_code=404)
 
 
+@app.post("/genai/upload_document")
+async def genai_upload_document(file: UploadFile = File(...)):
+    try:
+        with open(f"{image_storage_path}/{file.filename}", "wb") as image:
+            image.write(file.file.read())
+        return JSONResponse(content={"message": f"upload_document Done :{file.filename}"}, status_code=200)
+    except Exception as ex:
+        print(ex)
+        return JSONResponse(content={"message": "upload_document Failed"}, status_code=404)
+
+
+@app.post("/genai/delete_all_document")
+async def genai_delete_all_document():
+    try:
+        return JSONResponse(content={"message": "delete_all_document DONE"}, status_code=200)
+    except Exception as ex:
+        print(ex)
+        return JSONResponse(content={"message": "delete_all_document Failed"}, status_code=404)
+
+
 if __name__ == "__main__":
     import uvicorn
-
     uvicorn.run(app, host="0.0.0.0", port=8000)
