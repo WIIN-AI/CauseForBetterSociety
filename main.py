@@ -200,7 +200,7 @@ async def gen_ai_get_all_documents():
         return JSONResponse(content={"message": list_docs}, status_code=200)
     except Exception as ex:
         print(ex)
-        return JSONResponse(content={"message": [] }, status_code=404)
+        return JSONResponse(content={"message": []}, status_code=404)
 
 
 if __name__ == "__main__":
