@@ -131,7 +131,7 @@ async def single_incident_details(image_id: str):
         _data = json.load(f)
 
     if image_id in _data:
-        return JSONResponse(content={"comments": _data[image_id]}, status_code=200)
+        return JSONResponse(_data[image_id], status_code=200)
     else:
         return JSONResponse(content={"message": f"Image {image_id} not found"}, status_code=404)
 
@@ -142,7 +142,7 @@ async def single_incident_details():
         # Retrieve comments for a specific image
         with open(comments_file, "r") as f:
             _data = json.load(f)
-        return JSONResponse(content={"comments": _data}, status_code=200)
+        return JSONResponse(_data, status_code=200)
     except Exception as ex:
         return JSONResponse(content={"message": ex}, status_code=404)
 
@@ -174,20 +174,21 @@ async def genai_chat(user_query: str):
 
 
 @app.post("/genai/upload_document")
-async def genai_upload_document(file: UploadFile = File(...)):
+async def genai_upload_document(file: UploadFile = File(...), session_id: str = Form(...)):
     try:
         with open(f"{image_storage_path}/{file.filename}", "wb") as image:
             image.write(file.file.read())
+            print(session_id)
         return JSONResponse(content={"message": f"upload_document Done :{file.filename}"}, status_code=200)
     except Exception as ex:
         print(ex)
         return JSONResponse(content={"message": "upload_document Failed"}, status_code=404)
 
 
-@app.post("/genai/delete_all_document")
-async def genai_delete_all_document():
+@app.delete("/genai/delete_all_document")
+async def genai_delete_all_document(session_id: str):
     try:
-        return JSONResponse(content={"message": "delete_all_document DONE"}, status_code=200)
+        return JSONResponse(content={"message": f"delete_all_document {session_id} DONE"}, status_code=200)
     except Exception as ex:
         print(ex)
         return JSONResponse(content={"message": "delete_all_document Failed"}, status_code=404)
@@ -197,7 +198,7 @@ async def genai_delete_all_document():
 async def gen_ai_get_all_documents():
     try:
         list_docs = ["SAMPLE_DOC_01", "SAMPLE_DOC_02"]
-        return JSONResponse(content={"message": list_docs}, status_code=200)
+        return JSONResponse(content={"documents": list_docs}, status_code=200)
     except Exception as ex:
         print(ex)
         return JSONResponse(content={"message": []}, status_code=404)
@@ -205,4 +206,5 @@ async def gen_ai_get_all_documents():
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
