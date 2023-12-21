@@ -194,7 +194,7 @@ async def genai_delete_all_document(session_id: str):
         return JSONResponse(content={"message": "delete_all_document Failed"}, status_code=404)
 
 
-@app.post("/genai/get_all_documents")
+@app.get("/genai/get_all_documents")
 async def gen_ai_get_all_documents():
     try:
         list_docs = ["SAMPLE_DOC_01", "SAMPLE_DOC_02"]
