@@ -195,8 +195,9 @@ async def genai_delete_all_document(session_id: str):
 
 
 @app.get("/genai/get_all_documents")
-async def gen_ai_get_all_documents():
+async def gen_ai_get_all_documents(session_id:str):
     try:
+        print(session_id)
         list_docs = ["SAMPLE_DOC_01", "SAMPLE_DOC_02"]
         return JSONResponse(content={"documents": list_docs}, status_code=200)
     except Exception as ex:
