@@ -10,6 +10,8 @@ import boto3
 import os
 from typing import List
 import uuid
+import datetime
+
 
 from rootdir import ROOT_DIR
 
@@ -52,12 +54,16 @@ except FileNotFoundError:
 
 
 @app.post("/add_image/")
+
 async def add_image(file: UploadFile = File(...),
                     heading: str = None, description: str = None,
-                    user_visibility: bool = True, location: str = None):
+                    user_visibility: bool = True, location: str = None, email: str = None):
     with open(f"{image_storage_path}/{file.filename}", "wb") as image:
         image.write(file.file.read())
     uuid_ = str(uuid.uuid4())
+    # Fetch the current date and time
+    now = datetime.datetime.now()
+    today_date = now.strftime("%d-%m-%Y")
     # Add image information to the comments file
     image_info = {"filename": file.filename,
                   "uuid": uuid_,
@@ -66,7 +72,9 @@ async def add_image(file: UploadFile = File(...),
                   "comments": [],
                   "user_visibility": user_visibility,
                   "location": location,
-                  "like": None
+                  'date' : today_date,
+                  "like": None,
+                  "email": email
                   }
     print(image_info)
     with open(comments_file, "r") as f:
@@ -106,7 +114,11 @@ async def get_images():
     image_list = [{
         "image_id": info["uuid"],
         "filename": info["filename"],
-        "description": info["description"]
+        "description": info["description"],
+        "heading": info["heading"],
+        "user_visibility" : info["user_visibility"],
+        "date" : info["date"],   
+        "email" : info["email"]     
     } for info in comments.values()]
 
     return JSONResponse(content=image_list)
@@ -148,7 +160,7 @@ async def single_incident_details():
 
 
 @app.get("/like_status")
-async def like_status_update(image_id: str, is_liked: bool):
+async def like_status_update(image_id: str, is_liked: bool):    
     with open(comments_file, "r") as f:
         comments = json.load(f)
 
