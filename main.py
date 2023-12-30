@@ -38,7 +38,7 @@ image_storage_path = os.path.join(ROOT_DIR, "image_storage")
 if not os.path.exists(image_storage_path): os.makedirs(image_storage_path)
 
 # Store comments in a file manager
-comments_storage_path = os.path.join(ROOT_DIR, "Comments")
+comments_storage_path = os.path.join(ROOT_DIR, "comments")
 comments_file = os.path.join(comments_storage_path, "comments.json")
 # Create Comments storage directory if it doesn't exist
 if not os.path.exists(comments_storage_path): os.makedirs(comments_storage_path)
