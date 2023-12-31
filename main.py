@@ -57,6 +57,7 @@ except FileNotFoundError:
 
 async def add_image(file: UploadFile = File(...),
                     heading: str = None, description: str = None,
+                    subheading: str = None,
                     user_visibility: bool = True, location: str = None, email: str = None):
     with open(f"{image_storage_path}/{file.filename}", "wb") as image:
         image.write(file.file.read())
@@ -68,6 +69,7 @@ async def add_image(file: UploadFile = File(...),
     image_info = {"filename": file.filename,
                   "uuid": uuid_,
                   "heading": heading,
+                  "subheading": subheading,
                   "description": description,
                   "comments": [],
                   "user_visibility": user_visibility,
@@ -115,6 +117,7 @@ async def get_images():
         "image_id": info["uuid"],
         "filename": info["filename"],
         "description": info["description"],
+        "subheading": info["subheading"],
         "heading": info["heading"],
         "user_visibility" : info["user_visibility"],
         "date" : info["date"],   
