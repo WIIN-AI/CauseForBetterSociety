@@ -67,6 +67,7 @@ async def add_image(file: UploadFile = File(...),
     today_date = now.strftime("%d-%m-%Y")
     # Add image information to the comments file
     image_info = {"filename": file.filename,
+                  "image_path": f"{image_storage_path}/{file.filename}",
                   "uuid": uuid_,
                   "heading": heading,
                   "subheading": subheading,
